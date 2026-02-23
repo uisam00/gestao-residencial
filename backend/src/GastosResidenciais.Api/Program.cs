@@ -1,4 +1,8 @@
+using System.Text;
 using GastosResidenciais.CrossCutting.IoC;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
