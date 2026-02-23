@@ -18,8 +18,9 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
 
-        services.AddApplication();
+        // Infrastructure primeiro para MigrationHostedService rodar antes do SeedAdmin.
         services.AddInfrastructure(configuration);
+        services.AddApplication();
 
         return services;
     }

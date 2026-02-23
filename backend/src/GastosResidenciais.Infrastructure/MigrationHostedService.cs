@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Hosting; // IMPORTANTE
 using Microsoft.Extensions.DependencyInjection;
-using GastosResidenciais.Infrastructure.Context;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using GastosResidenciais.Infrastructure.Context;
 
 namespace GastosResidenciais.Infrastructure;
 

@@ -1,5 +1,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using GastosResidenciais.Application.Interfaces;
+using GastosResidenciais.Application.Services;
+using GastosResidenciais.Application.Seeds;
 
 namespace GastosResidenciais.Application;
 
@@ -14,7 +17,8 @@ public static class ApplicationDependencyInjection
         //services.AddScoped<ICategoryService, CategoryService>();
         //services.AddScoped<ITransactionService, TransactionService>();
         //services.AddScoped<IReportService, ReportService>();
-        //services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddHostedService<SeedAdminHostedService>();
 
         return services;
     }

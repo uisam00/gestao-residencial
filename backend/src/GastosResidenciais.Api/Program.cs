@@ -1,4 +1,5 @@
 using System.Text;
+using GastosResidenciais.Api.Services;
 using GastosResidenciais.CrossCutting.IoC;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Registro das dependências do backend (DbContext + serviços de aplicação).
 builder.Services.AddDependencyInjection(builder.Configuration);
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
