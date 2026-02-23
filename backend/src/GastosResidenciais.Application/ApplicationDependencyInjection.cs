@@ -14,10 +14,12 @@ public static class ApplicationDependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        //services.AddScoped<ICategoryService, CategoryService>();
-        //services.AddScoped<ITransactionService, TransactionService>();
-        //services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<IAuthService, AuthService>();
+        
         services.AddHostedService<SeedAdminHostedService>();
 
         return services;
