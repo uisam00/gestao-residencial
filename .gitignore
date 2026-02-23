@@ -1,0 +1,13 @@
+# .NET
+**/bin/
+**/obj/
+
+# Node / frontend
+node_modules/
+dist/
+
+# IDE / OS
+.vs/
+.vscode/
+.DS_Store
+Thumbs.db
