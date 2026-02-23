@@ -1,4 +1,8 @@
+
+using Microsoft.Extensions.DependencyInjection;
+
 namespace GastosResidenciais.Application;
+
 
 /// <summary>
 /// Registra os serviços de aplicação.

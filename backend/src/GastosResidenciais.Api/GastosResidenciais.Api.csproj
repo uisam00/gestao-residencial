@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\GastosResidenciais.Application\GastosResidenciais.Application.csproj" />
     <ProjectReference Include="..\GastosResidenciais.CrossCutting.IoC\GastosResidenciais.CrossCutting.IoC.csproj" />
-    <ProjectReference Include="..\GastosResidenciais.Infrastructure\GastosResidenciais.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
