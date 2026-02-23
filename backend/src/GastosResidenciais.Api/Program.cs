@@ -9,8 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Registro das dependências do backend (DbContext + serviços de aplicação).
 builder.Services.AddDependencyInjection(builder.Configuration);
 
+// Swagger / OpenAPI
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // JWT: chave e validação do token.
-var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key não configurado. Verifique appsettings ou variáveis de ambiente.");
 var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -58,6 +63,12 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gastos Residenciais API");
+        c.RoutePrefix = "docs";
+    });
     app.MapOpenApi();
 }
 

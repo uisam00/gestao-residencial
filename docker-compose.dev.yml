@@ -19,6 +19,9 @@ services:
   api:
     image: mcr.microsoft.com/dotnet/sdk:10.0
     container_name: gastos-api-dev
+    # Executa como root dentro do container para evitar erros de permissão
+    # ao sobrescrever DLLs em volumes montados (MSB3021 Access to the path denied).
+    user: "0:0"
     working_dir: /src/backend/src/GastosResidenciais.Api
     depends_on:
       postgres:
