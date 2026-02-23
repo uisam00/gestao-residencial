@@ -1,5 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\GastosResidenciais.Application\GastosResidenciais.Application.csproj" />
+    <ProjectReference Include="..\GastosResidenciais.Infrastructure\GastosResidenciais.Infrastructure.csproj" />
+    <ProjectReference Include="..\GastosResidenciais.Domain\GastosResidenciais.Domain.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
