@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: gastos-postgres-dev
+    environment:
+      POSTGRES_DB: gastosresidenciais
+      POSTGRES_USER: gastos
+      POSTGRES_PASSWORD: gastos
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastos -d gastosresidenciais"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    container_name: gastos-api-dev
+    working_dir: /src/backend/src/GastosResidenciais.Api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Monta o código-fonte do backend para permitir hot reload com dotnet watch.
+      - ./backend:/src/backend
+    command: ["dotnet", "watch", "run", "--project", "GastosResidenciais.Api.csproj", "--urls", "http://0.0.0.0:5000"]
+    ports:
+      - "5000:5000"
+
+ 
