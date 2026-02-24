@@ -32,6 +32,18 @@ public class TransactionService(IDataContext dbContext) : ITransactionService
             .ToList();
     }
 
+    public async Task<IReadOnlyCollection<TransactionDto>> GetAllForUserAsync(string? role, int? personId, CancellationToken cancellationToken = default)
+    {
+        var all = await GetAllAsync(cancellationToken);
+
+        if (string.Equals(role, "User", StringComparison.OrdinalIgnoreCase) && personId.HasValue)
+        {
+            return all.Where(t => t.PersonId == personId.Value).ToArray();
+        }
+
+        return all;
+    }
+
     public async Task<TransactionDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var t = await dbContext.Transactions

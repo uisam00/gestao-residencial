@@ -13,15 +13,11 @@ public class TransactionsController(ITransactionService service) : ControllerBas
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<TransactionDto>>> GetAll(CancellationToken cancellationToken)
     {
-        var transactions = await service.GetAllAsync(cancellationToken);
-
         var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
         var personIdClaim = User.FindFirst("person_id")?.Value;
 
-        if (string.Equals(role, "User", StringComparison.OrdinalIgnoreCase) && int.TryParse(personIdClaim, out var personId))
-        {
-            transactions = transactions.Where(t => t.PersonId == personId).ToArray();
-        }
+        int? personId = int.TryParse(personIdClaim, out var parsedPersonId) ? parsedPersonId : null;
+        var transactions = await service.GetAllForUserAsync(role, personId, cancellationToken);
 
         return Ok(transactions);
     }
