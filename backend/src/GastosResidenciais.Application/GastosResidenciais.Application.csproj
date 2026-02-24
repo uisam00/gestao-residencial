@@ -2,11 +2,11 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GastosResidenciais.Domain\GastosResidenciais.Domain.csproj" />
-    <ProjectReference Include="..\GastosResidenciais.Infrastructure\GastosResidenciais.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GastosResidenciais.Infrastructure.Context;
+using GastosResidenciais.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
@@ -19,6 +20,9 @@ public static class InfrastructureDependencyInjection
 
         services.AddDbContext<DataContext>(options =>
             options.UseNpgsql(connectionString));
+
+        // Expõe o DataContext também pela abstração IDataContext usada na camada de aplicação.
+        services.AddScoped<IDataContext>(sp => sp.GetRequiredService<DataContext>());
 
         services.AddHostedService<MigrationHostedService>();
         

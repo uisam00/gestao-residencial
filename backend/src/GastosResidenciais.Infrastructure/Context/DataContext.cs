@@ -1,4 +1,5 @@
 using GastosResidenciais.Domain.Entities;
+using GastosResidenciais.Application.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace GastosResidenciais.Infrastructure.Context;
@@ -6,6 +7,7 @@ namespace GastosResidenciais.Infrastructure.Context;
 /// <summary>
 /// Contexto principal de acesso ao banco de dados usando EF Core.
 /// Expõe os DbSets de cada entidade e configura as regras de mapeamento.
+/// Implementa a abstração <see cref="IDataContext"/> usada pela camada de aplicação.
 /// </summary>
 public class DataContext : DbContext, IDataContext
 {

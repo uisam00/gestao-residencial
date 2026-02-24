@@ -1,13 +1,13 @@
 using GastosResidenciais.Application.Dtos;
 using GastosResidenciais.Application.Interfaces;
+using GastosResidenciais.Application.Abstractions;
 using GastosResidenciais.Domain.Entities;
 using GastosResidenciais.Domain.Enums;
-using GastosResidenciais.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GastosResidenciais.Application.Services;
 
-public class TransactionService(DataContext dbContext) : ITransactionService
+public class TransactionService(IDataContext dbContext) : ITransactionService
 {
     public async Task<IReadOnlyCollection<TransactionDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
@@ -116,9 +116,7 @@ public class TransactionService(DataContext dbContext) : ITransactionService
         dbContext.Transactions.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        await dbContext.Entry(entity).Reference(t => t.Person).LoadAsync(cancellationToken);
-        await dbContext.Entry(entity).Reference(t => t.Category).LoadAsync(cancellationToken);
-
+        // Já temos person e category carregados acima, então usamos esses dados para o DTO.
         return new TransactionDto(
             entity.Id,
             entity.Description,
@@ -126,9 +124,9 @@ public class TransactionService(DataContext dbContext) : ITransactionService
             entity.Type,
             entity.CategoryId,
             entity.PersonId,
-            entity.Person?.Name ?? string.Empty,
-            entity.Category?.Description ?? string.Empty,
-            entity.Category?.ColorHex);
+            person.Name,
+            category.Description,
+            category.ColorHex);
     }
 
     public async Task<TransactionDto?> UpdateAsync(int id, TransactionInputDto input, CancellationToken cancellationToken = default)
@@ -195,9 +193,7 @@ public class TransactionService(DataContext dbContext) : ITransactionService
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        await dbContext.Entry(entity).Reference(t => t.Person).LoadAsync(cancellationToken);
-        await dbContext.Entry(entity).Reference(t => t.Category).LoadAsync(cancellationToken);
-
+        // Também já temos person e category carregados neste método.
         return new TransactionDto(
             entity.Id,
             entity.Description,
@@ -205,9 +201,9 @@ public class TransactionService(DataContext dbContext) : ITransactionService
             entity.Type,
             entity.CategoryId,
             entity.PersonId,
-            entity.Person?.Name ?? string.Empty,
-            entity.Category?.Description ?? string.Empty,
-            entity.Category?.ColorHex);
+            person.Name,
+            category.Description,
+            category.ColorHex);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

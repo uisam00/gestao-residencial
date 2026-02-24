@@ -1,12 +1,12 @@
 using GastosResidenciais.Application.Dtos;
 using GastosResidenciais.Application.Interfaces;
+using GastosResidenciais.Application.Abstractions;
 using GastosResidenciais.Domain.Enums;
-using GastosResidenciais.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GastosResidenciais.Application.Services;
 
-public class ReportService(DataContext dbContext) : IReportService
+public class ReportService(IDataContext dbContext) : IReportService
 {
     public async Task<PersonTotalsSummaryDto> GetTotalsByPersonAsync(int? personId, int? categoryId, TransactionType? type, CancellationToken cancellationToken = default)
     {

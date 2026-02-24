@@ -1,13 +1,13 @@
 using GastosResidenciais.Application.Dtos;
 using GastosResidenciais.Application.Interfaces;
+using GastosResidenciais.Application.Abstractions;
 using GastosResidenciais.Domain.Entities;
 using GastosResidenciais.Domain.Enums;
-using GastosResidenciais.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GastosResidenciais.Application.Services;
 
-public class AuthService(DataContext dbContext) : IAuthService
+public class AuthService(IDataContext dbContext) : IAuthService
 {
     private const string DefaultAdminUsername = "admin";
     private const string DefaultAdminPassword = "admin";

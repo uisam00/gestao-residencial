@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GastosResidenciais.Domain\GastosResidenciais.Domain.csproj" />
+    <ProjectReference Include="..\GastosResidenciais.Application\GastosResidenciais.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

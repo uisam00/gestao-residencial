@@ -1,10 +1,11 @@
 using GastosResidenciais.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace GastosResidenciais.Infrastructure.Context;
+namespace GastosResidenciais.Application.Abstractions;
 
 /// <summary>
-/// Contrato do contexto de dados para injeção de dependência.
+/// Abstração do contexto de dados utilizada pela camada de aplicação.
+/// Implementações concretas (por exemplo, EF Core) vivem na camada de infraestrutura.
 /// </summary>
 public interface IDataContext
 {
@@ -14,3 +15,4 @@ public interface IDataContext
     DbSet<User> Users { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
+

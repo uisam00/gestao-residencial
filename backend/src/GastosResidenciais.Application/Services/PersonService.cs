@@ -1,13 +1,13 @@
 using GastosResidenciais.Application.Dtos;
 using GastosResidenciais.Application.Interfaces;
+using GastosResidenciais.Application.Abstractions;
 using GastosResidenciais.Domain.Entities;
 using GastosResidenciais.Domain.Enums;
-using GastosResidenciais.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace GastosResidenciais.Application.Services;
 
-public class PersonService(DataContext dbContext) : IPersonService
+public class PersonService(IDataContext dbContext) : IPersonService
 {
     public async Task<IReadOnlyCollection<PersonDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
