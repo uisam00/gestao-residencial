@@ -1,0 +1,27 @@
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+# Copia todo o projeto do frontend para dentro da imagem.
+# Como ainda não existe node_modules na máquina, o diretório será criado apenas dentro do container.
+COPY frontend ./frontend
+
+WORKDIR /app/frontend
+
+# Instala dependências e gera o build estático da aplicação React.
+RUN npm install && npm run build
+
+# Imagem final minimalista para servir os arquivos estáticos gerados pelo Vite.
+FROM node:22-alpine AS runtime
+
+WORKDIR /app/frontend
+
+COPY --from=build /app/frontend/dist ./dist
+
+# Usa o pacote "serve" para servir o conteúdo estático gerado pelo Vite.
+RUN npm install -g serve
+
+EXPOSE 4173
+
+CMD ["serve", "-s", "dist", "-l", "4173"]
+
