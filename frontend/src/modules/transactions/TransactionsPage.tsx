@@ -1,13 +1,8 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import {
-  apiClient,
-  type CategoryDto,
-  type PersonDto,
-  type TransactionDto,
-  type TransactionInputDto,
-  type TransactionType,
-} from '../../services/ApiClient'
+import { apiClient, type TransactionDto, type TransactionInputDto, type TransactionType } from '../../services/ApiClient'
 import { useAuth } from '../../context/AuthContext'
+import { PersonSelect } from '../../components/PersonSelect'
+import { CategorySelect } from '../../components/CategorySelect'
 
 const TRANSACTION_LABEL: Record<TransactionType, string> = {
   Expense: 'Despesa',
@@ -19,8 +14,6 @@ const TRANSACTION_LABEL: Record<TransactionType, string> = {
 export function TransactionsPage() {
   const { role, personId: currentPersonId } = useAuth()
   const [transactions, setTransactions] = useState<TransactionDto[]>([])
-  const [people, setPeople] = useState<PersonDto[]>([])
-  const [categories, setCategories] = useState<CategoryDto[]>([])
   const [form, setForm] = useState<TransactionInputDto>({
     description: '',
     amount: 0,
@@ -37,32 +30,15 @@ export function TransactionsPage() {
     setError(null)
     try {
       if (role === 'User') {
-        const [txs, categoriesData] = await Promise.all([
-          apiClient.getTransactions(),
-          apiClient.getCategories(),
-        ])
+        const txs = await apiClient.getTransactions()
         setTransactions(txs)
-        setCategories(categoriesData)
-        setPeople([])
         setForm((prev) => ({
           ...prev,
           personId: currentPersonId ?? 0,
-          categoryId: prev.categoryId || categoriesData[0]?.id || 0,
         }))
       } else {
-        const [txs, peopleData, categoriesData] = await Promise.all([
-          apiClient.getTransactions(),
-          apiClient.getPeople(),
-          apiClient.getCategories(),
-        ])
+        const txs = await apiClient.getTransactions()
         setTransactions(txs)
-        setPeople(peopleData)
-        setCategories(categoriesData)
-        setForm((prev) => ({
-          ...prev,
-          personId: prev.personId || peopleData[0]?.id || 0,
-          categoryId: prev.categoryId || categoriesData[0]?.id || 0,
-        }))
       }
     } catch (e) {
       setError((e as Error).message)
@@ -189,32 +165,18 @@ export function TransactionsPage() {
           {role === 'Admin' && (
             <label>
               Pessoa
-              <select
+              <PersonSelect
                 value={form.personId}
-                onChange={(e) => setForm((f) => ({ ...f, personId: Number(e.target.value) }))}
-              >
-                <option value={0}>Selecione...</option>
-                {people.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({p.age} anos)
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => setForm((f) => ({ ...f, personId: value }))}
+              />
             </label>
           )}
           <label>
             Categoria
-            <select
+            <CategorySelect
               value={form.categoryId}
-              onChange={(e) => setForm((f) => ({ ...f, categoryId: Number(e.target.value) }))}
-            >
-              <option value={0}>Selecione...</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.description}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => setForm((f) => ({ ...f, categoryId: value }))}
+            />
           </label>
         </div>
         {error && <p className="error">{error}</p>}
@@ -266,7 +228,14 @@ export function TransactionsPage() {
                     <td>{TRANSACTION_LABEL[t.type]}</td>
                     <td>{t.amount.toFixed(2)}</td>
                     <td>{t.personName}</td>
-                    <td>{t.categoryDescription}</td>
+                    <td>
+                      <span
+                        className="tag"
+                        style={{ backgroundColor: t.categoryColorHex ?? '#e5e7eb' }}
+                      >
+                        {t.categoryDescription}
+                      </span>
+                    </td>
                     <td>
                       <button type="button" onClick={() => handleEdit(t)}>
                         Editar

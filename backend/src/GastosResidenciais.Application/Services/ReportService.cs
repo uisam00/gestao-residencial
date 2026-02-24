@@ -8,7 +8,7 @@ namespace GastosResidenciais.Application.Services;
 
 public class ReportService(DataContext dbContext) : IReportService
 {
-    public async Task<PersonTotalsSummaryDto> GetTotalsByPersonAsync(CancellationToken cancellationToken = default)
+    public async Task<PersonTotalsSummaryDto> GetTotalsByPersonAsync(int? personId, int? categoryId, TransactionType? type, CancellationToken cancellationToken = default)
     {
         var peopleWithTransactions = await dbContext.People
             .Include(p => p.Transactions)
@@ -22,11 +22,28 @@ public class ReportService(DataContext dbContext) : IReportService
 
         foreach (var person in peopleWithTransactions)
         {
-            var income = person.Transactions
+            if (personId.HasValue && person.Id != personId.Value)
+            {
+                continue;
+            }
+
+            var transactions = person.Transactions.AsEnumerable();
+
+            if (categoryId.HasValue)
+            {
+                transactions = transactions.Where(t => t.CategoryId == categoryId.Value);
+            }
+
+            if (type.HasValue)
+            {
+                transactions = transactions.Where(t => t.Type == type.Value);
+            }
+
+            var income = transactions
                 .Where(t => t.Type == TransactionType.Income)
                 .Sum(t => t.Amount);
 
-            var expense = person.Transactions
+            var expense = transactions
                 .Where(t => t.Type == TransactionType.Expense)
                 .Sum(t => t.Amount);
 
@@ -49,7 +66,7 @@ public class ReportService(DataContext dbContext) : IReportService
             totalIncome - totalExpense);
     }
 
-    public async Task<CategoryTotalsSummaryDto> GetTotalsByCategoryAsync(CancellationToken cancellationToken = default)
+    public async Task<CategoryTotalsSummaryDto> GetTotalsByCategoryAsync(int? personId, int? categoryId, TransactionType? type, CancellationToken cancellationToken = default)
     {
         var categoriesWithTransactions = await dbContext.Categories
             .Include(c => c.Transactions)
@@ -63,11 +80,28 @@ public class ReportService(DataContext dbContext) : IReportService
 
         foreach (var category in categoriesWithTransactions)
         {
-            var income = category.Transactions
+            if (categoryId.HasValue && category.Id != categoryId.Value)
+            {
+                continue;
+            }
+
+            var transactions = category.Transactions.AsEnumerable();
+
+            if (personId.HasValue)
+            {
+                transactions = transactions.Where(t => t.PersonId == personId.Value);
+            }
+
+            if (type.HasValue)
+            {
+                transactions = transactions.Where(t => t.Type == type.Value);
+            }
+
+            var income = transactions
                 .Where(t => t.Type == TransactionType.Income)
                 .Sum(t => t.Amount);
 
-            var expense = category.Transactions
+            var expense = transactions
                 .Where(t => t.Type == TransactionType.Expense)
                 .Sum(t => t.Amount);
 
@@ -78,6 +112,7 @@ public class ReportService(DataContext dbContext) : IReportService
                 category.Id,
                 category.Description,
                 category.Purpose,
+                category.ColorHex,
                 income,
                 expense,
                 income - expense));

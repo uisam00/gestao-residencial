@@ -17,7 +17,7 @@ public class CategoryService(DataContext dbContext) : ICategoryService
             .ToListAsync(cancellationToken);
 
         return categories
-            .Select(c => new CategoryDto(c.Id, c.Description, c.Purpose))
+            .Select(c => new CategoryDto(c.Id, c.Description, c.Purpose, c.ColorHex))
             .ToList();
     }
 
@@ -37,12 +37,57 @@ public class CategoryService(DataContext dbContext) : ICategoryService
         {
             Description = input.Description.Trim(),
             Purpose = input.Purpose,
+            ColorHex = string.IsNullOrWhiteSpace(input.ColorHex)
+                ? null
+                : input.ColorHex.Trim(),
         };
 
         dbContext.Categories.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CategoryDto(entity.Id, entity.Description, entity.Purpose);
+        return new CategoryDto(entity.Id, entity.Description, entity.Purpose, entity.ColorHex);
+    }
+
+    public async Task<CategoryDto?> UpdateAsync(int id, CategoryInputDto input, CancellationToken cancellationToken = default)
+    {
+        var entity = await dbContext.Categories.FindAsync([id], cancellationToken);
+        if (entity is null)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(input.Description) || input.Description.Length > 400)
+        {
+            throw new ArgumentException("Descrição é obrigatória e deve ter no máximo 400 caracteres.", nameof(input.Description));
+        }
+
+        if (!Enum.IsDefined(typeof(CategoryPurpose), input.Purpose))
+        {
+            throw new ArgumentException("Finalidade de categoria inválida.", nameof(input.Purpose));
+        }
+
+        entity.Description = input.Description.Trim();
+        entity.Purpose = input.Purpose;
+        entity.ColorHex = string.IsNullOrWhiteSpace(input.ColorHex)
+            ? null
+            : input.ColorHex.Trim();
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return new CategoryDto(entity.Id, entity.Description, entity.Purpose, entity.ColorHex);
+    }
+
+    public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var entity = await dbContext.Categories.FindAsync([id], cancellationToken);
+        if (entity is null)
+        {
+            return false;
+        }
+
+        dbContext.Categories.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }
 

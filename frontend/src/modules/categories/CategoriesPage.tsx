@@ -11,7 +11,8 @@ const PURPOSE_LABEL: Record<CategoryPurpose, string> = {
 // Aqui o usuário define se a categoria é usada para despesa, receita ou ambas.
 export function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryDto[]>([])
-  const [form, setForm] = useState<CategoryInputDto>({ description: '', purpose: 'Expense' })
+  const [form, setForm] = useState<CategoryInputDto>({ description: '', purpose: 'Expense', colorHex: '#2563eb' })
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,8 +43,41 @@ export function CategoriesPage() {
         return
       }
 
-      await apiClient.createCategory(form)
-      setForm({ description: '', purpose: 'Expense' })
+      if (editingId == null) {
+        await apiClient.createCategory(form)
+      } else {
+        await apiClient.updateCategory(editingId, form)
+        setEditingId(null)
+      }
+
+      setForm({ description: '', purpose: 'Expense', colorHex: '#2563eb' })
+      await load()
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+
+  function handleEdit(category: CategoryDto) {
+    setEditingId(category.id)
+    setError(null)
+    setForm({
+      description: category.description,
+      purpose: category.purpose,
+      colorHex: category.colorHex ?? '#2563eb',
+    })
+  }
+
+  async function handleDelete(id: number) {
+    if (
+      !confirm(
+        'Tem certeza que deseja remover esta categoria? Todas as transações ligadas a ela também serão removidas.',
+      )
+    )
+      return
+
+    setError(null)
+    try {
+      await apiClient.deleteCategory(id)
       await load()
     } catch (e) {
       setError((e as Error).message)
@@ -82,11 +116,31 @@ export function CategoriesPage() {
               <option value="Both">Ambas</option>
             </select>
           </label>
+          <label>
+            Cor
+            <input
+              type="color"
+              value={form.colorHex ?? '#2563eb'}
+              onChange={(e) => setForm((f) => ({ ...f, colorHex: e.target.value }))}
+            />
+          </label>
         </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" className="primary">
-          Adicionar categoria
+          {editingId == null ? 'Adicionar categoria' : 'Salvar alterações'}
         </button>
+        {editingId != null && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              setEditingId(null)
+              setForm({ description: '', purpose: 'Expense', colorHex: '#2563eb' })
+            }}
+          >
+            Cancelar edição
+          </button>
+        )}
       </form>
 
       <div className="card">
@@ -101,15 +155,31 @@ export function CategoriesPage() {
             <table className="table">
               <thead>
                 <tr>
+                  <th>Cor</th>
                   <th>Descrição</th>
                   <th>Finalidade</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {categories.map((c) => (
                   <tr key={c.id}>
+                    <td>
+                      <span
+                        className="tag-color"
+                        style={{ backgroundColor: c.colorHex ?? '#e5e7eb' }}
+                      />
+                    </td>
                     <td>{c.description}</td>
                     <td>{PURPOSE_LABEL[c.purpose]}</td>
+                    <td>
+                      <button type="button" onClick={() => handleEdit(c)}>
+                        Editar
+                      </button>
+                      <button type="button" onClick={() => handleDelete(c.id)} className="danger">
+                        Excluir
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

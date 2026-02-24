@@ -10,7 +10,8 @@ public record TransactionDto(
     int CategoryId,
     int PersonId,
     string PersonName,
-    string CategoryDescription);
+    string CategoryDescription,
+    string? CategoryColorHex);
 
 public record TransactionInputDto(
     string Description,

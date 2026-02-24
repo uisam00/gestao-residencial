@@ -42,6 +42,9 @@ public class DataContext : DbContext, IDataContext
 
             entity.Property(c => c.Purpose)
                 .IsRequired();
+
+            entity.Property(c => c.ColorHex)
+                .HasMaxLength(7);
         });
 
         modelBuilder.Entity<Transaction>(entity =>
@@ -60,7 +63,7 @@ public class DataContext : DbContext, IDataContext
             entity.HasOne(t => t.Category)
                 .WithMany(c => c.Transactions)
                 .HasForeignKey(t => t.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<User>(entity =>

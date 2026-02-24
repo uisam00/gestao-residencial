@@ -27,7 +27,8 @@ public class TransactionService(DataContext dbContext) : ITransactionService
                 t.CategoryId,
                 t.PersonId,
                 t.Person?.Name ?? string.Empty,
-                t.Category?.Description ?? string.Empty))
+                t.Category?.Description ?? string.Empty,
+                t.Category?.ColorHex))
             .ToList();
     }
 
@@ -49,7 +50,8 @@ public class TransactionService(DataContext dbContext) : ITransactionService
                 t.CategoryId,
                 t.PersonId,
                 t.Person?.Name ?? string.Empty,
-                t.Category?.Description ?? string.Empty);
+                t.Category?.Description ?? string.Empty,
+                t.Category?.ColorHex);
     }
 
     public async Task<TransactionDto> CreateAsync(TransactionInputDto input, CancellationToken cancellationToken = default)
@@ -125,7 +127,8 @@ public class TransactionService(DataContext dbContext) : ITransactionService
             entity.CategoryId,
             entity.PersonId,
             entity.Person?.Name ?? string.Empty,
-            entity.Category?.Description ?? string.Empty);
+            entity.Category?.Description ?? string.Empty,
+            entity.Category?.ColorHex);
     }
 
     public async Task<TransactionDto?> UpdateAsync(int id, TransactionInputDto input, CancellationToken cancellationToken = default)
@@ -203,7 +206,8 @@ public class TransactionService(DataContext dbContext) : ITransactionService
             entity.CategoryId,
             entity.PersonId,
             entity.Person?.Name ?? string.Empty,
-            entity.Category?.Description ?? string.Empty);
+            entity.Category?.Description ?? string.Empty,
+            entity.Category?.ColorHex);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)

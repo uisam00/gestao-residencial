@@ -31,5 +31,28 @@ public class CategoriesController(ICategoryService service) : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<CategoryDto?>> Update(int id, [FromBody] CategoryInputDto input, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var updated = await service.UpdateAsync(id, input, cancellationToken);
+            return updated is null ? NotFound() : Ok(updated);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+    {
+        var deleted = await service.DeleteAsync(id, cancellationToken);
+        return deleted ? NoContent() : NotFound();
+    }
 }
 

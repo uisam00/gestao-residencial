@@ -55,11 +55,13 @@ export type CategoryDto = {
   id: number
   description: string
   purpose: CategoryPurpose
+  colorHex?: string | null
 }
 
 export type CategoryInputDto = {
   description: string
   purpose: CategoryPurpose
+  colorHex?: string | null
 }
 
 export type TransactionType = 'Expense' | 'Income'
@@ -73,6 +75,7 @@ export type TransactionDto = {
   personId: number
   personName: string
   categoryDescription: string
+  categoryColorHex?: string | null
 }
 
 export type TransactionInputDto = {
@@ -103,6 +106,7 @@ export type CategoryTotalsDto = {
   id: number
   description: string
   purpose: CategoryPurpose
+  colorHex?: string | null
   totalIncome: number
   totalExpense: number
   balance: number
@@ -198,6 +202,23 @@ export const apiClient = {
     return handleResponse<CategoryDto>(res)
   },
 
+  async updateCategory(id: number, input: CategoryInputDto): Promise<CategoryDto> {
+    const res = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(input),
+    })
+    return handleResponse<CategoryDto>(res)
+  },
+
+  async deleteCategory(id: number): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    })
+    return handleResponse<void>(res)
+  },
+
   // Transações ---------------------------------------------------------------
   async getTransactions(): Promise<TransactionDto[]> {
     const res = await fetch(`${API_BASE_URL}/api/transactions`, { headers: authHeaders() })
@@ -231,13 +252,25 @@ export const apiClient = {
   },
 
   // Relatórios ---------------------------------------------------------------
-  async getTotalsByPerson(): Promise<PersonTotalsSummaryDto> {
-    const res = await fetch(`${API_BASE_URL}/api/reports/by-person`, { headers: authHeaders() })
+  async getTotalsByPerson(filters?: { personId?: number; categoryId?: number; type?: TransactionType }): Promise<PersonTotalsSummaryDto> {
+    const params = new URLSearchParams()
+    if (filters?.personId) params.append('personId', String(filters.personId))
+    if (filters?.categoryId) params.append('categoryId', String(filters.categoryId))
+    if (filters?.type) params.append('type', filters.type)
+    const qs = params.toString()
+    const url = `${API_BASE_URL}/api/reports/by-person${qs ? `?${qs}` : ''}`
+    const res = await fetch(url, { headers: authHeaders() })
     return handleResponse<PersonTotalsSummaryDto>(res)
   },
 
-  async getTotalsByCategory(): Promise<CategoryTotalsSummaryDto> {
-    const res = await fetch(`${API_BASE_URL}/api/reports/by-category`, { headers: authHeaders() })
+  async getTotalsByCategory(filters?: { personId?: number; categoryId?: number; type?: TransactionType }): Promise<CategoryTotalsSummaryDto> {
+    const params = new URLSearchParams()
+    if (filters?.personId) params.append('personId', String(filters.personId))
+    if (filters?.categoryId) params.append('categoryId', String(filters.categoryId))
+    if (filters?.type) params.append('type', filters.type)
+    const qs = params.toString()
+    const url = `${API_BASE_URL}/api/reports/by-category${qs ? `?${qs}` : ''}`
+    const res = await fetch(url, { headers: authHeaders() })
     return handleResponse<CategoryTotalsSummaryDto>(res)
   },
 }

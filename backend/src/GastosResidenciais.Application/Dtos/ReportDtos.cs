@@ -1,3 +1,5 @@
+using GastosResidenciais.Domain.Enums;
+
 namespace GastosResidenciais.Application.Dtos;
 
 public record PersonTotalsDto(
@@ -11,7 +13,8 @@ public record PersonTotalsDto(
 public record CategoryTotalsDto(
     int Id,
     string Description,
-    object Purpose,
+    CategoryPurpose Purpose,
+    string? ColorHex,
     decimal TotalIncome,
     decimal TotalExpense,
     decimal Balance);
