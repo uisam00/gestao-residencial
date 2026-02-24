@@ -39,23 +39,23 @@ export function CategorySelect({ value, onChange, allowAllOption = false, labelA
           className="select-with-dot-input"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          style={{
+            color: selected?.colorHex ?? '#000000',
+          }}
         >
-          <option value={0}>{allowAllOption ? labelAllText : 'Selecione...'}</option>
+          <option style={{color: '#000'}} value={0}>{allowAllOption ? labelAllText : 'Selecione...'}</option>
           {categories.map((c) => (
             <option
               key={c.id}
               value={c.id}
+              style={c.colorHex ? { color: c.colorHex } : undefined}
             >
+              {c.colorHex ? '● ' : ''}
               {c.description}
             </option>
           ))}
         </select>
-        {selected?.colorHex && value !== 0 && (
-          <span
-            className="select-color-dot"
-            style={{ backgroundColor: selected.colorHex }}
-          />
-        )}
+
       </div>
       {loading && <small>Carregando categorias...</small>}
       {error && <small className="error">{error}</small>}

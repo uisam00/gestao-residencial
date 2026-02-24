@@ -62,7 +62,7 @@ export function LoginPage() {
             {submitting ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
-        </div>
+      </div>
     </div>
   )
 }

@@ -94,7 +94,7 @@ export function CategoriesPage() {
         </p>
       </header>
 
-      <form className="card form" onSubmit={handleSubmit}>
+      <form className="card form gap-5" onSubmit={handleSubmit}>
         <div className="form-row">
           <label>
             Descrição
