@@ -7,7 +7,7 @@ namespace GastosResidenciais.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize] // qualquer usuário autenticado pode consultar categorias
 public class CategoriesController(ICategoryService service) : ControllerBase
 {
     [HttpGet]
@@ -18,6 +18,7 @@ public class CategoriesController(ICategoryService service) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")] // apenas admin pode criar categorias
     public async Task<ActionResult<CategoryDto>> Create([FromBody] CategoryInputDto input, CancellationToken cancellationToken)
     {
         try

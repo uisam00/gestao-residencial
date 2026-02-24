@@ -7,6 +7,7 @@ import {
   type TransactionInputDto,
   type TransactionType,
 } from '../../services/ApiClient'
+import { useAuth } from '../../context/AuthContext'
 
 const TRANSACTION_LABEL: Record<TransactionType, string> = {
   Expense: 'Despesa',
@@ -16,6 +17,7 @@ const TRANSACTION_LABEL: Record<TransactionType, string> = {
 // Tela de cadastro e listagem de transações.
 // A API garante as regras: menores de 18 só podem ter despesas e a categoria deve aceitar o tipo escolhido.
 export function TransactionsPage() {
+  const { role, personId: currentPersonId } = useAuth()
   const [transactions, setTransactions] = useState<TransactionDto[]>([])
   const [people, setPeople] = useState<PersonDto[]>([])
   const [categories, setCategories] = useState<CategoryDto[]>([])
@@ -33,22 +35,34 @@ export function TransactionsPage() {
     setLoading(true)
     setError(null)
     try {
-      const [txs, peopleData, categoriesData] = await Promise.all([
-        apiClient.getTransactions(),
-        apiClient.getPeople(),
-        apiClient.getCategories(),
-      ])
-
-      setTransactions(txs)
-      setPeople(peopleData)
-      setCategories(categoriesData)
-
-      // Se ainda não há pessoa/categoria selecionadas, preenche com a primeira opção disponível.
-      setForm((prev) => ({
-        ...prev,
-        personId: prev.personId || peopleData[0]?.id || 0,
-        categoryId: prev.categoryId || categoriesData[0]?.id || 0,
-      }))
+      if (role === 'User') {
+        const [txs, categoriesData] = await Promise.all([
+          apiClient.getTransactions(),
+          apiClient.getCategories(),
+        ])
+        setTransactions(txs)
+        setCategories(categoriesData)
+        setPeople([])
+        setForm((prev) => ({
+          ...prev,
+          personId: currentPersonId ?? 0,
+          categoryId: prev.categoryId || categoriesData[0]?.id || 0,
+        }))
+      } else {
+        const [txs, peopleData, categoriesData] = await Promise.all([
+          apiClient.getTransactions(),
+          apiClient.getPeople(),
+          apiClient.getCategories(),
+        ])
+        setTransactions(txs)
+        setPeople(peopleData)
+        setCategories(categoriesData)
+        setForm((prev) => ({
+          ...prev,
+          personId: prev.personId || peopleData[0]?.id || 0,
+          categoryId: prev.categoryId || categoriesData[0]?.id || 0,
+        }))
+      }
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -75,12 +89,17 @@ export function TransactionsPage() {
         return
       }
 
-      if (!form.personId || !form.categoryId) {
-        setError('Selecione uma pessoa e uma categoria.')
+      if ((!form.personId && role === 'Admin') || !form.categoryId) {
+        setError('Selecione uma pessoa (se aplicável) e uma categoria.')
         return
       }
 
-      await apiClient.createTransaction(form)
+      const payload: TransactionInputDto =
+        role === 'User' && currentPersonId
+          ? { ...form, personId: currentPersonId }
+          : form
+
+      await apiClient.createTransaction(payload)
       setForm((prev) => ({
         ...prev,
         description: '',
@@ -137,20 +156,22 @@ export function TransactionsPage() {
           </label>
         </div>
         <div className="form-row">
-          <label>
-            Pessoa
-            <select
-              value={form.personId}
-              onChange={(e) => setForm((f) => ({ ...f, personId: Number(e.target.value) }))}
-            >
-              <option value={0}>Selecione...</option>
-              {people.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({p.age} anos)
-                </option>
-              ))}
-            </select>
-          </label>
+          {role === 'Admin' && (
+            <label>
+              Pessoa
+              <select
+                value={form.personId}
+                onChange={(e) => setForm((f) => ({ ...f, personId: Number(e.target.value) }))}
+              >
+                <option value={0}>Selecione...</option>
+                {people.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({p.age} anos)
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label>
             Categoria
             <select

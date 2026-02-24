@@ -15,9 +15,14 @@ export function LoginPage() {
     setError('')
     setSubmitting(true)
     try {
-      const ok = await login(username.trim(), password)
-      if (ok) navigate('/people', { replace: true })
-      else setError('Usuário ou senha inválidos.')
+      const role = await login(username.trim(), password)
+      if (role === 'Admin') {
+        navigate('/people', { replace: true })
+      } else if (role === 'User') {
+        navigate('/reports', { replace: true })
+      } else {
+        setError('Usuário ou senha inválidos.')
+      }
     } catch {
       setError('Erro ao conectar. Tente novamente.')
     } finally {
@@ -57,8 +62,7 @@ export function LoginPage() {
             {submitting ? 'Entrando…' : 'Entrar'}
           </button>
         </form>
-        <p className="login-hint">Usuário padrão: admin / admin</p>
-      </div>
+        </div>
     </div>
   )
 }

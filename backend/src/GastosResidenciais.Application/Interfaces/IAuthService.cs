@@ -10,6 +10,9 @@ public interface IAuthService
     /// <summary>Valida usuário/senha e retorna os dados do usuário se válido.</summary>
     Task<LoginResult?> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 
+    /// <summary>Obtém os dados da pessoa/usuário logados a partir do PersonId.</summary>
+    Task<CurrentUserDto?> GetCurrentUserAsync(int personId, CancellationToken cancellationToken = default);
+
     /// <summary>Garante que existe um usuário admin (senha "admin") para uso inicial.</summary>
     Task EnsureAdminExistsAsync(CancellationToken cancellationToken = default);
 }

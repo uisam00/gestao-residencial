@@ -72,8 +72,16 @@ public class DataContext : DbContext, IDataContext
             entity.Property(u => u.PasswordHash)
                 .IsRequired()
                 .HasMaxLength(500);
+            entity.Property(u => u.Role)
+                .IsRequired();
+
             entity.HasIndex(u => u.Username)
                 .IsUnique();
+
+            entity.HasOne(u => u.Person)
+                .WithOne(p => p.User!)
+                .HasForeignKey<User>(u => u.PersonId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

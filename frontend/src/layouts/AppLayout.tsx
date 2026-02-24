@@ -5,19 +5,23 @@ type AppLayoutProps = {
   Routes: React.ReactNode
 }
 export function AppLayout({ Routes }: AppLayoutProps) {
-  const { username, logout } = useAuth()
+  const { username, logout, role } = useAuth()
 
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <h1 className="app-title">Gastos Residenciais</h1>
         <nav className="nav">
-          <NavLink to="/people" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            Pessoas
-          </NavLink>
-          <NavLink to="/categories" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
-            Categorias
-          </NavLink>
+          {role === 'Admin' && (
+            <>
+              <NavLink to="/people" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+                Pessoas
+              </NavLink>
+              <NavLink to="/categories" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+                Categorias
+              </NavLink>
+            </>
+          )}
           <NavLink to="/transactions" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
             Transações
           </NavLink>

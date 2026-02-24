@@ -7,12 +7,12 @@ namespace GastosResidenciais.Api.Services;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(string username);
+    string GenerateToken(int userId, int personId, string username, string role);
 }
 
 public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerator
 {
-    public string GenerateToken(string username)
+    public string GenerateToken(int userId, int personId, string username, string role)
     {
         var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is not set");
         var issuer = configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer is not set");
@@ -21,10 +21,18 @@ public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerato
         var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
         var creds = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256);
 
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.Role, role),
+            new Claim("person_id", personId.ToString())
+        };
+
         var token = new JwtSecurityToken(
             issuer,
             audience,
-            new[] { new Claim(ClaimTypes.Name, username) },
+            claims,
             expires: DateTime.UtcNow.AddHours(8),
             signingCredentials: creds);
 

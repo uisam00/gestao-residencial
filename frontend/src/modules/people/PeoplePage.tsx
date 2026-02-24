@@ -1,14 +1,24 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { apiClient, type PersonDto, type PersonInputDto } from '../../services/ApiClient'
+import { useAuth } from '../../context/AuthContext'
 
 // Tela de manutenção de pessoas.
 // Permite listar, criar, editar e excluir pessoas, respeitando validações da API.
 export function PeoplePage() {
   const [people, setPeople] = useState<PersonDto[]>([])
-  const [form, setForm] = useState<PersonInputDto>({ name: '', age: 0 })
+  const [form, setForm] = useState<PersonInputDto>({
+    name: '',
+    age: 0,
+    createUser: false,
+    username: '',
+    password: '',
+    isAdmin: false,
+  })
   const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const { role } = useAuth()
 
   async function load() {
     setLoading(true)
@@ -50,7 +60,14 @@ export function PeoplePage() {
         setEditingId(null)
       }
 
-      setForm({ name: '', age: 0 })
+      setForm({
+        name: '',
+        age: 0,
+        createUser: false,
+        username: '',
+        password: '',
+        isAdmin: false,
+      })
       await load()
     } catch (e) {
       setError((e as Error).message)
@@ -60,7 +77,14 @@ export function PeoplePage() {
   async function handleEdit(person: PersonDto) {
     // Preenche o formulário com os dados atuais para edição.
     setEditingId(person.id)
-    setForm({ name: person.name, age: person.age })
+    setForm({
+      name: person.name,
+      age: person.age,
+      createUser: person.hasUser,
+      username: person.username ?? '',
+      password: '',
+      isAdmin: person.role === 'Admin',
+    })
   }
 
   async function handleDelete(id: number) {
@@ -103,6 +127,97 @@ export function PeoplePage() {
             />
           </label>
         </div>
+
+        {/* Dados de usuário vinculados à pessoa (somente para admin) */}
+        {role === 'Admin' && (
+          <>
+            {/* Se estamos editando alguém que já tem usuário, mostra sempre os campos de usuário */}
+            {editingId !== null && people.find((p) => p.id === editingId)?.hasUser && (
+              <div className="form-row">
+                <label>
+                  Username
+                  <input
+                    type="text"
+                    value={form.username ?? ''}
+                    maxLength={100}
+                    onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                  />
+                </label>
+                <label>
+                  Nova senha (opcional)
+                  <input
+                    type="password"
+                    value={form.password ?? ''}
+                    onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  />
+                </label>
+                <label>
+                  Perfil
+                  <select
+                    value={form.isAdmin ? 'Admin' : 'User'}
+                    onChange={(e) => setForm((f) => ({ ...f, isAdmin: e.target.value === 'Admin' }))}
+                  >
+                    <option value="User">Usuário normal</option>
+                    <option value="Admin">Administrador</option>
+                  </select>
+                </label>
+              </div>
+            )}
+
+            {/* Criação de usuário novo (pessoa sem usuário, seja novo cadastro ou edição) */}
+            {(editingId === null || !people.find((p) => p.id === editingId)?.hasUser) && (
+              <>
+                <div className="form-row">
+                  <label className="checkbox-inline">
+                    <input
+                      type="checkbox"
+                      checked={form.createUser}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          createUser: e.target.checked,
+                        }))
+                      }
+                    />
+                    Criar usuário para esta pessoa
+                  </label>
+                </div>
+
+                {form.createUser && (
+                  <div className="form-row">
+                    <label>
+                      Username
+                      <input
+                        type="text"
+                        value={form.username ?? ''}
+                        maxLength={100}
+                        onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                      />
+                    </label>
+                    <label>
+                      Senha
+                      <input
+                        type="password"
+                        value={form.password ?? ''}
+                        onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                      />
+                    </label>
+                    <label>
+                      Perfil
+                      <select
+                        value={form.isAdmin ? 'Admin' : 'User'}
+                        onChange={(e) => setForm((f) => ({ ...f, isAdmin: e.target.value === 'Admin' }))}
+                      >
+                        <option value="User">Usuário normal</option>
+                        <option value="Admin">Administrador</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
         {error && <p className="error">{error}</p>}
         <button type="submit" className="primary">
           {editingId == null ? 'Adicionar pessoa' : 'Salvar alterações'}
@@ -113,7 +228,14 @@ export function PeoplePage() {
             className="secondary"
             onClick={() => {
               setEditingId(null)
-              setForm({ name: '', age: 0 })
+              setForm({
+                name: '',
+                age: 0,
+                createUser: false,
+                username: '',
+                password: '',
+                isAdmin: false,
+              })
             }}
           >
             Cancelar edição

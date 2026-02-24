@@ -35,11 +35,18 @@ export type PersonDto = {
   id: number
   name: string
   age: number
+  hasUser: boolean
+  username?: string | null
+  role?: 'Admin' | 'User' | null
 }
 
 export type PersonInputDto = {
   name: string
   age: number
+  createUser: boolean
+  username?: string
+  password?: string
+  isAdmin: boolean
 }
 
 export type CategoryPurpose = 'Expense' | 'Income' | 'Both'
@@ -108,7 +115,21 @@ export type CategoryTotalsSummaryDto = {
   grandBalance: number
 }
 
-export type LoginResponse = { token: string; username: string }
+export type LoginResponse = {
+  token: string
+  username: string
+  personName: string
+  role: 'Admin' | 'User'
+  personId: number
+}
+
+export type MeResponse = {
+  personId: number
+  personName: string
+  age: number
+  username: string
+  role: 'Admin' | 'User'
+}
 
 export const apiClient = {
   // Auth ---------------------------------------------------------------------
@@ -122,6 +143,13 @@ export const apiClient = {
   },
 
   setToken,
+
+  async getMe(): Promise<MeResponse> {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
+      headers: authHeaders(),
+    })
+    return handleResponse<MeResponse>(res)
+  },
 
   // Pessoas ------------------------------------------------------------------
   async getPeople(): Promise<PersonDto[]> {

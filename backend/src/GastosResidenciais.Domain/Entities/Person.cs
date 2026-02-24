@@ -21,6 +21,11 @@ public class Person
     public int Age { get; set; }
 
     /// <summary>
+    /// Usuário associado (caso esta pessoa tenha acesso ao sistema).
+    /// </summary>
+    public User? User { get; set; }
+
+    /// <summary>
     /// Coleção de transações associadas à pessoa.
     /// Usado pelo EF Core para configurar o relacionamento e suportar deleção em cascata.
     /// </summary>

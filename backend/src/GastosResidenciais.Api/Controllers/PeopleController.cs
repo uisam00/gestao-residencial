@@ -7,7 +7,7 @@ namespace GastosResidenciais.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class PeopleController(IPersonService service) : ControllerBase
 {
     [HttpGet]
