@@ -30,6 +30,8 @@ services:
       # Connection string usada pelo EF Core (MigrationHostedService aplica as migrations na subida).
       ConnectionStrings__DefaultConnection: "Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=${DB_NAME:-gastosresidenciais};Username=${DB_USER:-gastos};Password=${DB_PASSWORD:-gastos}"
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # true/1 = executar seeds (admin + categorias/pessoas/transações); false/0 = desabilitar.
+      RUN_SEED: ${RUN_SEED:-true}
     ports:
       - "5000:5000"
 

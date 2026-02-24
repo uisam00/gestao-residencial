@@ -18,6 +18,8 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 ENV ASPNETCORE_URLS=http://0.0.0.0:5000
+# RUN_SEED: true/1 para executar seeds (admin + dados iniciais); false/0 para desabilitar. Padrão: true.
+ENV RUN_SEED=true
 EXPOSE 5000
 
 ENTRYPOINT ["dotnet", "GastosResidenciais.Api.dll"]

@@ -21,6 +21,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         
         services.AddHostedService<SeedAdminHostedService>();
+        services.AddHostedService<SeedDataHostedService>();
 
         return services;
     }
