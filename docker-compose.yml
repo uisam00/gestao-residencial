@@ -5,9 +5,9 @@ services:
     image: postgres:16
     container_name: gastos-postgres
     environment:
-      POSTGRES_DB: gastosresidenciais
-      POSTGRES_USER: gastos
-      POSTGRES_PASSWORD: gastos
+      POSTGRES_DB: ${DB_NAME:-gastosresidenciais}
+      POSTGRES_USER: ${DB_USER:-gastos}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gastos}
     ports:
       - "5432:5432"
     volumes:
@@ -26,6 +26,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    environment:
+      # Connection string usada pelo EF Core (MigrationHostedService aplica as migrations na subida).
+      ConnectionStrings__DefaultConnection: "Host=${DB_HOST:-postgres};Port=${DB_PORT:-5432};Database=${DB_NAME:-gastosresidenciais};Username=${DB_USER:-gastos};Password=${DB_PASSWORD:-gastos}"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
     ports:
       - "5000:5000"
 
@@ -36,6 +40,9 @@ services:
     container_name: gastos-frontend
     depends_on:
       - api
+    environment:
+      # URL que o frontend usa para chamar a API (.NET)
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
     ports:
       - "4173:4173"
 

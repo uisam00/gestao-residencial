@@ -1,0 +1,10 @@
+frontend/node_modules
+backend/**/bin
+backend/**/obj
+.git
+.gitignore
+.cursor
+Dockerfile*
+docker-compose*.yml
+README.md
+
