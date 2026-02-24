@@ -157,7 +157,7 @@ export function PeoplePage() {
                     value={form.isAdmin ? 'Admin' : 'User'}
                     onChange={(e) => setForm((f) => ({ ...f, isAdmin: e.target.value === 'Admin' }))}
                   >
-                    <option value="User">Usuário normal</option>
+                    <option value="User">Usuário</option>
                     <option value="Admin">Administrador</option>
                   </select>
                 </label>
@@ -208,7 +208,7 @@ export function PeoplePage() {
                         value={form.isAdmin ? 'Admin' : 'User'}
                         onChange={(e) => setForm((f) => ({ ...f, isAdmin: e.target.value === 'Admin' }))}
                       >
-                        <option value="User">Usuário normal</option>
+                        <option value="User">Usuário</option>
                         <option value="Admin">Administrador</option>
                       </select>
                     </label>

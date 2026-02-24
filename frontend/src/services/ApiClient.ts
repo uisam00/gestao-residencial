@@ -213,6 +213,23 @@ export const apiClient = {
     return handleResponse<TransactionDto>(res)
   },
 
+  async updateTransaction(id: number, input: TransactionInputDto): Promise<TransactionDto> {
+    const res = await fetch(`${API_BASE_URL}/api/transactions/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(input),
+    })
+    return handleResponse<TransactionDto>(res)
+  },
+
+  async deleteTransaction(id: number): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/transactions/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    })
+    return handleResponse<void>(res)
+  },
+
   // Relatórios ---------------------------------------------------------------
   async getTotalsByPerson(): Promise<PersonTotalsSummaryDto> {
     const res = await fetch(`${API_BASE_URL}/api/reports/by-person`, { headers: authHeaders() })

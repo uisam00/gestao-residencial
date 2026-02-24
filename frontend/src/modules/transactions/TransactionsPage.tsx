@@ -28,6 +28,7 @@ export function TransactionsPage() {
     categoryId: 0,
     personId: 0,
   })
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -99,12 +100,41 @@ export function TransactionsPage() {
           ? { ...form, personId: currentPersonId }
           : form
 
-      await apiClient.createTransaction(payload)
+      if (editingId == null) {
+        await apiClient.createTransaction(payload)
+      } else {
+        await apiClient.updateTransaction(editingId, payload)
+        setEditingId(null)
+      }
       setForm((prev) => ({
         ...prev,
         description: '',
         amount: 0,
       }))
+      await loadAll()
+    } catch (e) {
+      setError((e as Error).message)
+    }
+  }
+
+  function handleEdit(tx: TransactionDto) {
+    setEditingId(tx.id)
+    setError(null)
+    setForm({
+      description: tx.description,
+      amount: tx.amount,
+      type: tx.type,
+      categoryId: tx.categoryId,
+      personId: tx.personId,
+    })
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm('Tem certeza que deseja remover esta transação?')) return
+
+    setError(null)
+    try {
+      await apiClient.deleteTransaction(id)
       await loadAll()
     } catch (e) {
       setError((e as Error).message)
@@ -189,8 +219,24 @@ export function TransactionsPage() {
         </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" className="primary">
-          Registrar transação
+          {editingId == null ? 'Registrar transação' : 'Salvar alterações'}
         </button>
+        {editingId != null && (
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              setEditingId(null)
+              setForm((prev) => ({
+                ...prev,
+                description: '',
+                amount: 0,
+              }))
+            }}
+          >
+            Cancelar edição
+          </button>
+        )}
       </form>
 
       <div className="card">
@@ -210,6 +256,7 @@ export function TransactionsPage() {
                   <th>Valor</th>
                   <th>Pessoa</th>
                   <th>Categoria</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -220,6 +267,14 @@ export function TransactionsPage() {
                     <td>{t.amount.toFixed(2)}</td>
                     <td>{t.personName}</td>
                     <td>{t.categoryDescription}</td>
+                    <td>
+                      <button type="button" onClick={() => handleEdit(t)}>
+                        Editar
+                      </button>
+                      <button type="button" onClick={() => handleDelete(t.id)} className="danger">
+                        Excluir
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
