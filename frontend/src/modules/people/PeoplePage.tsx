@@ -257,6 +257,7 @@ export function PeoplePage() {
                 <tr>
                   <th>Nome</th>
                   <th>Idade</th>
+                  <th>Tipo de usuário</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -265,6 +266,7 @@ export function PeoplePage() {
                   <tr key={p.id}>
                     <td>{p.name}</td>
                     <td>{p.age}</td>
+                    <td>{p.role === 'Admin' ? 'Administrador' : 'Usuário'}</td>
                     <td>
                       <button type="button" onClick={() => handleEdit(p)}>
                         Editar
