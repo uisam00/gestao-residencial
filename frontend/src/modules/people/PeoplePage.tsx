@@ -259,28 +259,37 @@ export function PeoplePage() {
           </>
         )}
         {error && <p className="error">{error}</p>}
-        <button type="submit" className="primary">
-          {editingId == null ? "Adicionar pessoa" : "Salvar alterações"}
-        </button>
-        {editingId != null && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              setEditingId(null);
-              setForm({
-                name: "",
-                age: 0,
-                createUser: false,
-                username: "",
-                password: "",
-                isAdmin: false,
-              });
-            }}
-          >
-            Cancelar edição
+        <div
+          style={{
+            marginTop: "0.75rem",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.5rem",
+          }}
+        >
+          <button type="submit" className="primary">
+            {editingId == null ? "Adicionar pessoa" : "Salvar alterações"}
           </button>
-        )}
+          {editingId != null && (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                setEditingId(null);
+                setForm({
+                  name: "",
+                  age: 0,
+                  createUser: false,
+                  username: "",
+                  password: "",
+                  isAdmin: false,
+                });
+              }}
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="card">

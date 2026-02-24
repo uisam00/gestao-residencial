@@ -217,11 +217,12 @@ button {
 
 
 button.primary {
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  background-color: #2563eb;
   color: #f9fafb;
 }
 
 button.primary:hover {
+  background-color: #1d4ed8;
   border-color: #1d4ed8;
 }
 

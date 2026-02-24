@@ -126,21 +126,30 @@ export function CategoriesPage() {
           </label>
         </div>
         {error && <p className="error">{error}</p>}
-        <button type="submit" className="primary">
-          {editingId == null ? 'Adicionar categoria' : 'Salvar alterações'}
-        </button>
-        {editingId != null && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              setEditingId(null)
-              setForm({ description: '', purpose: 'Expense', colorHex: '#2563eb' })
-            }}
-          >
-            Cancelar edição
+        <div
+          style={{
+            marginTop: '0.75rem',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '0.5rem',
+          }}
+        >
+          <button type="submit" className="primary">
+            {editingId == null ? 'Adicionar categoria' : 'Salvar alterações'}
           </button>
-        )}
+          {editingId != null && (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                setEditingId(null)
+                setForm({ description: '', purpose: 'Expense', colorHex: '#2563eb' })
+              }}
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
       </form>
 
       <div className="card">
