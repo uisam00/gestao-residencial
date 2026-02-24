@@ -85,7 +85,11 @@ public class PersonService(IDataContext dbContext) : IPersonService
 
             if (usernameExists)
             {
-                throw new InvalidOperationException("Já existe um usuário com esse username.");
+                // Tratado como erro de validação (400) pela PeopleController,
+                // similar à validação de idade.
+                throw new ArgumentException(
+                    "Já existe um usuário com esse username.",
+                    nameof(input.Username));
             }
 
             var hash = BCrypt.Net.BCrypt.HashPassword(input.Password);
@@ -149,7 +153,10 @@ public class PersonService(IDataContext dbContext) : IPersonService
 
             if (usernameExists)
             {
-                throw new InvalidOperationException("Já existe um usuário com esse username.");
+                // Mesmo tratamento amigável do create.
+                throw new ArgumentException(
+                    "Já existe um usuário com esse username.",
+                    nameof(input.Username));
             }
 
             var role = input.IsAdmin ? UserRole.Admin : UserRole.User;
