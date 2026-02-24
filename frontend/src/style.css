@@ -42,6 +42,10 @@ a {
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
   background: linear-gradient(180deg, #1e293b, #020617);
   color: #e5e7eb;
   padding: 1.75rem 1.5rem;
@@ -259,7 +263,7 @@ button.danger {
 /* Scroll apenas na área da listagem (tabela), mantendo cabeçalho e formulário fixos. */
 .list-scroll {
   overflow-y: auto;
-  max-height: min(55vh, 420px);
+  max-height: min(47vh, 420px);
 }
 
 .error {
@@ -366,7 +370,7 @@ button.danger {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 460px;
+  max-height: 480px;
 }
 
 .reports-tabs {
@@ -397,6 +401,11 @@ button.danger {
 
 .reports-list {
   flex: 1;
+}
+
+.reports-chart-container {
+  min-height: 320px;
+  width: 100%;
 }
 
 .reports-summary {

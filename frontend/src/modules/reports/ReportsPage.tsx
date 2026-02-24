@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
 import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
   apiClient,
   type CategoryPurpose,
   type CategoryTotalsSummaryDto,
@@ -29,6 +39,19 @@ export function ReportsPage() {
   const [filterType, setFilterType] = useState<TransactionType | "">("");
   const [activeTab, setActiveTab] = useState<"person" | "category">("person");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [personViewMode, setPersonViewMode] = useState<"chart" | "table">(
+    "chart",
+  );
+  const [categoryViewMode, setCategoryViewMode] = useState<"chart" | "table">(
+    "chart",
+  );
+
+  const categoryChartData =
+    categoryTotals?.items.map((c) => ({
+      ...c,
+      incomeForChart: c.purpose === "Expense" ? null : c.totalIncome,
+      expenseForChart: c.purpose === "Income" ? null : c.totalExpense,
+    })) ?? [];
 
   async function load() {
     setLoading(true);
@@ -95,50 +118,57 @@ export function ReportsPage() {
         <div
           className={filtersOpen ? "filters-body open mt-2" : "filters-body"}
         >
-          <div className="flex flex-col " style={{ gap: "1rem" }}>
-            <div className="flex" style={{ gap: "1rem" }}>
-              <label>
-                Pessoa
-                <PersonSelect
-                  value={filterPersonId}
-                  onChange={setFilterPersonId}
-                  allowAllOption
-                  labelAllText="Todas"
-                />
-              </label>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto auto auto",
+              gap: "1rem 1.5rem",
+            }}
+          >
+            <label>
+              Pessoa
+              <PersonSelect
+                value={filterPersonId}
+                onChange={setFilterPersonId}
+                allowAllOption
+                labelAllText="Todas"
+              />
+            </label>
 
-              <label>
-                Categoria
-                <CategorySelect
-                  value={filterCategoryId}
-                  onChange={setFilterCategoryId}
-                  allowAllOption
-                  labelAllText="Todas"
-                />
-              </label>
+            <label>
+              Categoria
+              <CategorySelect
+                value={filterCategoryId}
+                onChange={setFilterCategoryId}
+                allowAllOption
+                labelAllText="Todas"
+              />
+            </label>
 
-              <label>
-                Tipo
-                <select
-                  className="rounded-md border border-slate-300 px-2 py-1 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-500"
-                  value={filterType}
-                  onChange={(e) =>
-                    setFilterType(e.target.value as TransactionType | "")
-                  }
-                >
-                  <option value="">Todos</option>
-                  <option value="Expense">Despesa</option>
-                  <option value="Income">Receita</option>
-                </select>
-              </label>
+            <label>
+              Tipo
+              <select
+                className="rounded-md border border-slate-300 px-2 py-1 text-sm outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-500"
+                value={filterType}
+                onChange={(e) =>
+                  setFilterType(e.target.value as TransactionType | "")
+                }
+              >
+                <option value="">Todos</option>
+                <option value="Expense">Despesa</option>
+                <option value="Income">Receita</option>
+              </select>
+            </label>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <button
+                type="button"
+                className="secondary w-fit rounded-full px-3 py-1 text-xs"
+                onClick={handleClearFilters}
+              >
+                Limpar filtros
+              </button>
             </div>
-            <button
-              type="button"
-              className="w-fit secondary mt-2 inline-flex items-center rounded-full px-3 py-1 text-xs"
-              onClick={handleClearFilters}
-            >
-              Limpar filtros
-            </button>
           </div>
         </div>
       </div>
@@ -168,34 +198,115 @@ export function ReportsPage() {
           <div className="reports-content">
             {personTotals && personTotals.items.length > 0 ? (
               <>
-                <div className="list-scroll reports-list">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Pessoa</th>
-                        <th>Idade</th>
-                        <th>Receitas</th>
-                        <th>Despesas</th>
-                        <th>Saldo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {personTotals.items.map((p) => (
-                        <tr key={p.id}>
-                          <td>{p.name}</td>
-                          <td>{p.age}</td>
-                          <td>{p.totalIncome.toFixed(2)}</td>
-                          <td>{p.totalExpense.toFixed(2)}</td>
-                          <td
-                            className={p.balance >= 0 ? "positive" : "negative"}
-                          >
-                            {p.balance.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="mb-2 flex justify-end gap-2 text-xs">
+                  <button
+                    type="button"
+                    className={
+                      personViewMode === "chart"
+                        ? "rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                        : "rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                    }
+                    onClick={() => setPersonViewMode("chart")}
+                  >
+                    Ver em gráfico
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      personViewMode === "table"
+                        ? "rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                        : "rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                    }
+                    onClick={() => setPersonViewMode("table")}
+                  >
+                    Ver em tabela
+                  </button>
                 </div>
+                {personViewMode === "chart" && (
+                  <div className="reports-chart-container">
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart
+                        data={personTotals.items}
+                        margin={{
+                          top: 12,
+                          right: 12,
+                          left: 12,
+                          bottom: 60,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="name"
+                          tick={{ fontSize: 12 }}
+                          angle={-35}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip
+                          formatter={(value: any) =>
+                            typeof value === "number"
+                              ? value.toFixed(2)
+                              : value ?? "-"
+                          }
+                          contentStyle={{
+                            borderRadius: "8px",
+                            border: "1px solid #e2e8f0",
+                          }}
+                        />
+                        <Legend />
+                        <Bar
+                          dataKey="totalIncome"
+                          name="Receitas"
+                          fill="#22c55e"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Bar
+                          dataKey="totalExpense"
+                          name="Despesas"
+                          fill="#ef4444"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Bar
+                          dataKey="balance"
+                          name="Saldo"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                {personViewMode === "table" && (
+                  <div className="list-scroll reports-list">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Pessoa</th>
+                          <th>Idade</th>
+                          <th>Receitas</th>
+                          <th>Despesas</th>
+                          <th>Saldo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {personTotals.items.map((p) => (
+                          <tr key={p.id}>
+                            <td>{p.name}</td>
+                            <td>{p.age}</td>
+                            <td>{p.totalIncome.toFixed(2)}</td>
+                            <td>{p.totalExpense.toFixed(2)}</td>
+                            <td
+                              className={p.balance >= 0 ? "positive" : "negative"}
+                            >
+                              {p.balance.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 <div className="summary-row reports-summary">
                   <span>
                     Total geral receitas:{" "}
@@ -226,58 +337,133 @@ export function ReportsPage() {
           <div className="reports-content">
             {categoryTotals && categoryTotals.items.length > 0 ? (
               <>
-                <div className="list-scroll reports-list">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Categoria</th>
-                        <th>Finalidade</th>
-                        <th>Receitas</th>
-                        <th>Despesas</th>
-                        <th>Saldo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {categoryTotals.items.map((c) => (
-                        <tr key={c.id}>
-                          <td>
-                            <span
-                              style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "0.4rem",
-                              }}
-                            >
-                              <span
-                                className="tag-color"
-                                style={{
-                                  backgroundColor: c.colorHex ?? "#e5e7eb",
-                                }}
-                              />
-                              <span>{c.description}</span>
-                            </span>
-                          </td>
-                          <td>{PURPOSE_LABEL[c.purpose]}</td>
-                          <td>
-                            {c.purpose === "Expense"
-                              ? "-"
-                              : c.totalIncome.toFixed(2)}
-                          </td>
-                          <td>
-                            {c.purpose === "Income"
-                              ? "-"
-                              : c.totalExpense.toFixed(2)}
-                          </td>
-                          <td
-                            className={c.balance >= 0 ? "positive" : "negative"}
-                          >
-                            {c.balance.toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="mb-2 flex justify-end gap-2 text-xs">
+                  <button
+                    type="button"
+                    className={
+                      categoryViewMode === "chart"
+                        ? "rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                        : "rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                    }
+                    onClick={() => setCategoryViewMode("chart")}
+                  >
+                    Ver em gráfico
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      categoryViewMode === "table"
+                        ? "rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                        : "rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700"
+                    }
+                    onClick={() => setCategoryViewMode("table")}
+                  >
+                    Ver em tabela
+                  </button>
                 </div>
+                {categoryViewMode === "chart" && (
+                  <div className="reports-chart-container">
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart
+                        data={categoryChartData}
+                        margin={{
+                          top: 12,
+                          right: 12,
+                          left: 12,
+                          bottom: 60,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="description"
+                          tick={{ fontSize: 12 }}
+                          angle={-35}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip
+                          formatter={(value: any) =>
+                            typeof value === "number"
+                              ? value.toFixed(2)
+                              : value ?? "-"
+                          }
+                          contentStyle={{
+                            borderRadius: "8px",
+                            border: "1px solid #e2e8f0",
+                          }}
+                        />
+                        <Legend />
+                        <Bar
+                          dataKey="incomeForChart"
+                          name="Receitas"
+                          fill="#22c55e"
+                          radius={[4, 4, 0, 0]}
+                        />
+                        <Bar
+                          dataKey="expenseForChart"
+                          name="Despesas"
+                          fill="#ef4444"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                {categoryViewMode === "table" && (
+                  <div className="list-scroll reports-list">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Categoria</th>
+                          <th>Finalidade</th>
+                          <th>Receitas</th>
+                          <th>Despesas</th>
+                          <th>Saldo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {categoryTotals.items.map((c) => (
+                          <tr key={c.id}>
+                            <td>
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "0.4rem",
+                                }}
+                              >
+                                <span
+                                  className="tag-color"
+                                  style={{
+                                    backgroundColor: c.colorHex ?? "#e5e7eb",
+                                  }}
+                                />
+                                <span>{c.description}</span>
+                              </span>
+                            </td>
+                            <td>{PURPOSE_LABEL[c.purpose]}</td>
+                            <td>
+                              {c.purpose === "Expense"
+                                ? "-"
+                                : c.totalIncome.toFixed(2)}
+                            </td>
+                            <td>
+                              {c.purpose === "Income"
+                                ? "-"
+                                : c.totalExpense.toFixed(2)}
+                            </td>
+                            <td
+                              className={c.balance >= 0 ? "positive" : "negative"}
+                            >
+                              {c.balance.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
                 <div className="summary-row reports-summary">
                   <span>
                     Total geral receitas:{" "}
@@ -305,6 +491,7 @@ export function ReportsPage() {
             )}
           </div>
         )}
+
       </div>
     </section>
   );

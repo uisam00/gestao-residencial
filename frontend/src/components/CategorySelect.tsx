@@ -36,7 +36,7 @@ export function CategorySelect({ value, onChange, allowAllOption = false, labelA
     <>
       <div className="select-with-dot">
         <select
-          className="select-with-dot-input"
+          className="w-full"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
           style={{
