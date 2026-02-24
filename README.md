@@ -1,18 +1,24 @@
 ## Controle de Gastos Residenciais
 
-Sistema simples para controle de despesas/receitas por pessoa e por categoria, dividido em:
-- **API** em `.NET 10` (pasta `Api`)
-- **Frontend** em `React + TypeScript` (pasta `frontend`)
+Sistema para controle de despesas/receitas por pessoa e por categoria, composto por:
+- **Backend (.NET)** na pasta `backend`
+- **Frontend (React + TypeScript)** na pasta `frontend`
 
 O banco de dados é **SQLite**, gravado no arquivo `Api/Data/app.db`, garantindo que os dados persistam entre reinicializações.
 
 ---
 
-## Pré-requisitos
+## Documentação detalhada
 
-- **Docker** e **Docker Compose** instalados  
-  ou
-- **.NET SDK 10**  
+- **Frontend** – ver [`frontend/README.md`](frontend/README.md)
+- **Backend** – ver [`backend/README.md`](backend/README.md)
+
+---
+
+## Pré-requisitos gerais
+
+- **Docker** e **Docker Compose** instalados, **ou**
+- **.NET SDK 10**
 - **Node.js 22+** e **npm**
 
 ---
@@ -29,6 +35,12 @@ docker compose -f docker-compose.dev.yml up
 
 - API: `http://localhost:5000`
 - Frontend (Vite dev server): `http://localhost:5173`
+
+Ao subir os containers de desenvolvimento:
+- As **migrations** do backend são aplicadas automaticamente.
+- É garantida a existência de um usuário **padrão** para acesso inicial ao sistema:
+  - usuário: `admin`
+  - senha: `admin`
 
 Para parar:
 

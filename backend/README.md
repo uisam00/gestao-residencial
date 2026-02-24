@@ -6,13 +6,15 @@ A intenção principal é: **separar responsabilidades**, **reduzir acoplamento*
 
 ### Visão Geral da Arquitetura
 
-API  →  Application  →  Domain  
-     ↓  
-    Infrastructure (Data)  
-     ↓  
- CrossCutting (IoC)
+Em termos de projetos (`.csproj`), a estrutura é:
 
-A dependência deve sempre apontar **para dentro (Domain)**. Ou seja, o domínio não conhece as demais camadas, mas todas as outras conhecem o domínio.
+- **Api** → **Application**, **CrossCutting.IoC**
+- **CrossCutting.IoC** → **Application**, **Infrastructure**, **Domain**
+- **Application** → **Domain**
+- **Infrastructure** → **Application**, **Domain**
+- **Domain** → *(não depende de ninguém)*
+
+A dependência continua apontando **para dentro (Domain)**. Ou seja, o domínio não conhece as demais camadas, mas todas as outras conhecem o domínio e/ou as abstrações definidas na Application.
 
 ### Camada `Domain` (`GastosResidenciais.Domain`)
 
@@ -23,14 +25,15 @@ A dependência deve sempre apontar **para dentro (Domain)**. Ou seja, o domínio
 ### Camada `Application` (`GastosResidenciais.Application`)
 
 - Implementa **casos de uso** / **serviços de aplicação** (por exemplo: cadastro de pessoas, lançamento de transações, cálculo de totais).
-- Orquestra chamadas ao domínio e à infraestrutura, mas evita conter regras complexas de persistência.
-- Expõe **DTOs** e **interfaces de serviços** consumidos pela API.
+- Orquestra chamadas ao domínio e a **abstrações de infraestrutura**, mas evita conter detalhes concretos de persistência (EF Core, drivers, etc.).
+- Expõe **DTOs**, **interfaces de serviços** consumidos pela API e a abstração de contexto de dados `Application.Abstractions.IDataContext`.
 
 ### Camada `Infrastructure` (`GastosResidenciais.Infrastructure`)
 
 - Implementa o **acesso a dados** (por exemplo, `DbContext` do EF Core, repositórios, migrations).
 - Conhece banco de dados, drivers, mapeamentos, etc.
-- Depende de `Domain` para mapear entidades.
+- Depende de `Domain` para mapear entidades e de `Application` para implementar as suas **abstrações**, por exemplo:
+  - `IDataContext` → implementado por `DataContext` (EF Core), e registrado no DI como `IDataContext`.
 
 ### Camada `CrossCutting.IoC` (`GastosResidenciais.CrossCutting.IoC`)
 
@@ -97,4 +100,51 @@ dotnet ef migrations list --project src/GastosResidenciais.Infrastructure --star
 ```
 
 Garanta que a **connection string** `DefaultConnection` em `appsettings.json` (ou `appsettings.Development.json`) da API esteja correta antes de criar ou aplicar migrations.
+
+---
+
+## Execução rápida do backend
+
+Na pasta `backend`:
+
+```bash
+dotnet run --project src/GastosResidenciais.Api
+```
+
+- API disponível em `http://localhost:5000` (ou `https://localhost:5001`, conforme perfil).
+- O banco **SQLite** é criado/atualizado automaticamente em `Api/Data/app.db` (via migrations).
+- Ao iniciar a aplicação, o `MigrationHostedService` aplica as migrations pendentes e o `SeedAdminHostedService` garante a existência de um usuário **padrão**:
+  - usuário: `admin`
+  - senha: `admin`
+  
+> **Importante:** em ambientes reais, altere a senha do usuário `admin` o quanto antes (ou remova esse seed) por motivos de segurança.
+
+Para desenvolvimento com hot reload:
+
+```bash
+dotnet watch run --project src/GastosResidenciais.Api
+```
+
+---
+
+## Autenticação e autorização
+
+- A API expõe um endpoint de login que retorna um **JWT** contendo:
+  - usuário,
+  - `personId` da pessoa associada,
+  - papel (`Admin` ou `User`).
+- O frontend envia esse token no header `Authorization: Bearer ...` em todas as chamadas.
+- Endpoints sensíveis usam **autorização baseada em roles**:
+  - `Admin`:
+    - pode gerenciar pessoas,
+    - pode gerenciar categorias,
+    - pode lançar transações para qualquer pessoa.
+  - `User`:
+    - só enxerga/lança transações para a própria pessoa,
+    - não tem acesso aos cadastros de pessoas/categorias.
+- As regras de negócio, como:
+  - **menores de 18 anos só podem ter despesas**,
+  - categoria deve aceitar o tipo de transação (`Expense` / `Income`),
+  são validadas nesta camada (serviços de aplicação / domínio), e erros retornam mensagens claras para o frontend.
+
 
